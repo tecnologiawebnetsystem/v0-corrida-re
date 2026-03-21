@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
 import { Play, Square, RotateCcw, MapPin, Zap, Flame, Gauge, Timer, Pause, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
 import { useGeolocation } from '@/hooks/use-geolocation'
 import { 
   saveRun, 
@@ -20,8 +20,21 @@ import {
 } from '@/lib/store'
 import { RunSession } from '@/lib/types'
 
-// Lazy load do mapa
-const RunMap = lazy(() => import('./run-map').then(mod => ({ default: mod.RunMap })))
+// Dynamic import do mapa (evita SSR com Leaflet)
+const RunMap = dynamic(
+  () => import('./run-map').then(mod => ({ default: mod.RunMap })),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[280px] md:h-[350px] rounded-xl bg-card border-2 border-primary/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <div className="text-muted-foreground text-sm">Carregando mapa...</div>
+        </div>
+      </div>
+    )
+  }
+)
 
 interface RunTrackerProps {
   onRunComplete: (run: RunSession) => void
@@ -163,21 +176,12 @@ export function RunTracker({ onRunComplete }: RunTrackerProps) {
       </Card>
 
       {/* Mapa - Sempre visível */}
-      <Suspense fallback={
-        <div className="w-full h-[280px] md:h-[350px] rounded-xl bg-card border-2 border-primary/30 flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-            <div className="text-muted-foreground text-sm">Carregando mapa...</div>
-          </div>
-        </div>
-      }>
-        <RunMap 
-          position={position} 
-          path={path} 
-          isTracking={isTracking}
-          isPaused={isPaused}
-        />
-      </Suspense>
+      <RunMap 
+        position={position} 
+        path={path} 
+        isTracking={isTracking}
+        isPaused={isPaused}
+      />
 
       {/* Timer Principal */}
       <Card className={`bg-card border-2 ${isRunning && !isPaused ? 'border-primary glow-yellow' : isPaused ? 'border-[#3B82F6] glow-blue' : 'border-border'} transition-all duration-300`}>
