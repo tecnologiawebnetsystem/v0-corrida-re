@@ -4,75 +4,75 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Project Run - Gaming Theme: Yellow, Black, Red */
-  --background: oklch(0.12 0 0);
-  --foreground: oklch(0.98 0 0);
-  --card: oklch(0.16 0 0);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.14 0 0);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.85 0.18 90); /* Yellow */
-  --primary-foreground: oklch(0.12 0 0);
-  --secondary: oklch(0.22 0 0);
-  --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.60 0.22 25); /* Red */
-  --accent-foreground: oklch(0.98 0 0);
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.28 0 0);
-  --input: oklch(0.22 0 0);
-  --ring: oklch(0.85 0.18 90);
-  --chart-1: oklch(0.85 0.18 90); /* Yellow */
-  --chart-2: oklch(0.60 0.22 25); /* Red */
-  --chart-3: oklch(0.70 0.15 85); /* Gold */
-  --chart-4: oklch(0.50 0.18 30); /* Dark Red */
-  --chart-5: oklch(0.75 0.20 95); /* Light Yellow */
+  /* Project Run - Gaming Theme: Amarelo, Preto, Vermelho */
+  --background: #0A0A0A;
+  --foreground: #FAFAFA;
+  --card: #141414;
+  --card-foreground: #FAFAFA;
+  --popover: #0F0F0F;
+  --popover-foreground: #FAFAFA;
+  --primary: #FACC15; /* Amarelo vibrante */
+  --primary-foreground: #0A0A0A;
+  --secondary: #1F1F1F;
+  --secondary-foreground: #FAFAFA;
+  --muted: #262626;
+  --muted-foreground: #A3A3A3;
+  --accent: #DC2626; /* Vermelho vibrante */
+  --accent-foreground: #FAFAFA;
+  --destructive: #B91C1C;
+  --destructive-foreground: #FAFAFA;
+  --border: #333333;
+  --input: #1F1F1F;
+  --ring: #FACC15;
+  --chart-1: #FACC15; /* Amarelo */
+  --chart-2: #DC2626; /* Vermelho */
+  --chart-3: #EAB308; /* Dourado */
+  --chart-4: #991B1B; /* Vermelho escuro */
+  --chart-5: #FDE047; /* Amarelo claro */
   --radius: 0.75rem;
-  --sidebar: oklch(0.10 0 0);
-  --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.85 0.18 90);
-  --sidebar-primary-foreground: oklch(0.12 0 0);
-  --sidebar-accent: oklch(0.20 0 0);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.25 0 0);
-  --sidebar-ring: oklch(0.85 0.18 90);
+  --sidebar: #080808;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #FACC15;
+  --sidebar-primary-foreground: #0A0A0A;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #FAFAFA;
+  --sidebar-border: #262626;
+  --sidebar-ring: #FACC15;
 }
 
 .dark {
-  --background: oklch(0.12 0 0);
-  --foreground: oklch(0.98 0 0);
-  --card: oklch(0.16 0 0);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.14 0 0);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.85 0.18 90);
-  --primary-foreground: oklch(0.12 0 0);
-  --secondary: oklch(0.22 0 0);
-  --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.22 0 0);
-  --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.60 0.22 25);
-  --accent-foreground: oklch(0.98 0 0);
-  --destructive: oklch(0.55 0.22 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.28 0 0);
-  --input: oklch(0.22 0 0);
-  --ring: oklch(0.85 0.18 90);
-  --chart-1: oklch(0.85 0.18 90);
-  --chart-2: oklch(0.60 0.22 25);
-  --chart-3: oklch(0.70 0.15 85);
-  --chart-4: oklch(0.50 0.18 30);
-  --chart-5: oklch(0.75 0.20 95);
-  --sidebar: oklch(0.10 0 0);
-  --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.85 0.18 90);
-  --sidebar-primary-foreground: oklch(0.12 0 0);
-  --sidebar-accent: oklch(0.20 0 0);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.25 0 0);
-  --sidebar-ring: oklch(0.85 0.18 90);
+  --background: #0A0A0A;
+  --foreground: #FAFAFA;
+  --card: #141414;
+  --card-foreground: #FAFAFA;
+  --popover: #0F0F0F;
+  --popover-foreground: #FAFAFA;
+  --primary: #FACC15;
+  --primary-foreground: #0A0A0A;
+  --secondary: #1F1F1F;
+  --secondary-foreground: #FAFAFA;
+  --muted: #262626;
+  --muted-foreground: #A3A3A3;
+  --accent: #DC2626;
+  --accent-foreground: #FAFAFA;
+  --destructive: #B91C1C;
+  --destructive-foreground: #FAFAFA;
+  --border: #333333;
+  --input: #1F1F1F;
+  --ring: #FACC15;
+  --chart-1: #FACC15;
+  --chart-2: #DC2626;
+  --chart-3: #EAB308;
+  --chart-4: #991B1B;
+  --chart-5: #FDE047;
+  --sidebar: #080808;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #FACC15;
+  --sidebar-primary-foreground: #0A0A0A;
+  --sidebar-accent: #1A1A1A;
+  --sidebar-accent-foreground: #FAFAFA;
+  --sidebar-border: #262626;
+  --sidebar-ring: #FACC15;
 }
 
 @theme inline {
@@ -125,15 +125,17 @@
   }
 }
 
-/* Gaming style effects */
+/* Gaming style effects - Glow amarelo */
 .glow-yellow {
-  box-shadow: 0 0 20px oklch(0.85 0.18 90 / 0.3);
+  box-shadow: 0 0 20px rgba(250, 204, 21, 0.4), 0 0 40px rgba(250, 204, 21, 0.2);
 }
 
+/* Gaming style effects - Glow vermelho */
 .glow-red {
-  box-shadow: 0 0 20px oklch(0.60 0.22 25 / 0.3);
+  box-shadow: 0 0 20px rgba(220, 38, 38, 0.4), 0 0 40px rgba(220, 38, 38, 0.2);
 }
 
+/* Pulse animation */
 .pulse-animation {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
@@ -145,4 +147,47 @@
   50% {
     opacity: 0.7;
   }
+}
+
+/* Leaflet map customizations */
+.leaflet-container {
+  background: #0A0A0A;
+  font-family: inherit;
+}
+
+.leaflet-tile-pane {
+  filter: saturate(0.8) brightness(0.9);
+}
+
+.current-position-marker {
+  background: transparent;
+  border: none;
+}
+
+@keyframes marker-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 15px #FACC15, 0 0 30px rgba(250, 204, 21, 0.5);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 0 25px #FACC15, 0 0 50px rgba(250, 204, 21, 0.7);
+  }
+}
+
+/* Gaming border accent */
+.gaming-border {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--card), var(--card)) padding-box,
+              linear-gradient(135deg, #FACC15, #DC2626) border-box;
+}
+
+/* Stats card hover effect */
+.stats-card {
+  transition: all 0.2s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(250, 204, 21, 0.15);
 }
