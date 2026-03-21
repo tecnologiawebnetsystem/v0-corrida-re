@@ -6,7 +6,7 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  transpilePackages: ['react-leaflet', 'leaflet'],
+  transpilePackages: ['leaflet'],
 }
 
 export default nextConfig
