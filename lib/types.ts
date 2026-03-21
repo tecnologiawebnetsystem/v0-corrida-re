@@ -1,3 +1,11 @@
+export interface GeoPosition {
+  latitude: number
+  longitude: number
+  accuracy: number
+  speed: number | null
+  timestamp: number
+}
+
 export interface RunSession {
   id: string
   date: string
@@ -16,6 +24,17 @@ export interface WeightEntry {
   date: string
   weight: number // em kg
   type: 'initial' | 'progress'
+}
+
+export interface WeeklyGoal {
+  targetKm: number
+  startDate: string // início da semana
+}
+
+export interface UserSettings {
+  name: string
+  weeklyGoalKm: number
+  weight: number
 }
 
 export interface RunnerStats {

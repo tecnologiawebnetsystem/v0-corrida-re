@@ -1,26 +1,28 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
+import { Orbitron, Rajdhani } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const geistSans = Geist({ 
+const orbitron = Orbitron({ 
   subsets: ["latin"],
-  variable: '--font-geist-sans'
+  variable: '--font-orbitron',
+  weight: ['400', '500', '600', '700', '800', '900']
 })
 
-const geistMono = Geist_Mono({ 
+const rajdhani = Rajdhani({ 
   subsets: ["latin"],
-  variable: '--font-geist-mono'
+  variable: '--font-rajdhani',
+  weight: ['300', '400', '500', '600', '700']
 })
 
 export const metadata: Metadata = {
-  title: 'Project Run - Rastreador de Corrida',
-  description: 'Acompanhe suas corridas, monitore seu progresso e alcance seus objetivos',
+  title: 'NITRO RUN - Rastreador de Corrida',
+  description: 'Acompanhe suas corridas com GPS em tempo real, monitore seu progresso e alcance seus objetivos',
   generator: 'v0.app',
 }
 
 export const viewport: Viewport = {
-  themeColor: '#1a1a1a',
+  themeColor: '#050505',
   width: 'device-width',
   initialScale: 1,
 }
@@ -32,7 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+      <body className={`${orbitron.variable} ${rajdhani.variable} font-sans antialiased`}>
         {children}
         <Analytics />
       </body>

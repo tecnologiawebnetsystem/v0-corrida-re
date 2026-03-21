@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Scale, Plus, Trash2, TrendingDown, TrendingUp, Minus, Calendar } from 'lucide-react'
+import { Scale, Plus, Trash2, TrendingDown, TrendingUp, Minus, Calendar, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -65,7 +65,6 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
     return date.toLocaleDateString('pt-BR', {
       day: 'numeric',
       month: 'short',
-      year: 'numeric',
     })
   }
 
@@ -95,27 +94,27 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Resumo */}
-      <div className="grid grid-cols-2 gap-4">
-        <Card className="bg-card border-border">
+      <div className="grid grid-cols-2 gap-3">
+        <Card className="bg-card border-border stats-card">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
-              <Scale className="h-4 w-4" />
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <Scale className="h-4 w-4 text-[#3B82F6]" />
               <span className="text-xs uppercase tracking-wider">Peso Atual</span>
             </div>
-            <div className="text-3xl font-bold text-foreground">
+            <div className="text-3xl font-black text-[#3B82F6]">
               {currentWeight > 0 ? `${currentWeight.toFixed(1)}` : '--'}
-              <span className="text-lg font-normal text-muted-foreground ml-1">kg</span>
+              <span className="text-base font-normal text-muted-foreground ml-1">kg</span>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-card border-border">
+        <Card className="bg-card border-border stats-card">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 text-muted-foreground mb-1">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
               {weightDiff < 0 ? (
-                <TrendingDown className="h-4 w-4 text-green-500" />
+                <TrendingDown className="h-4 w-4 text-[#22C55E]" />
               ) : weightDiff > 0 ? (
                 <TrendingUp className="h-4 w-4 text-accent" />
               ) : (
@@ -123,11 +122,11 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
               )}
               <span className="text-xs uppercase tracking-wider">Diferença</span>
             </div>
-            <div className={`text-3xl font-bold ${
-              weightDiff < 0 ? 'text-green-500' : weightDiff > 0 ? 'text-accent' : 'text-foreground'
+            <div className={`text-3xl font-black ${
+              weightDiff < 0 ? 'text-[#22C55E]' : weightDiff > 0 ? 'text-accent' : 'text-foreground'
             }`}>
               {weightDiff !== 0 ? (weightDiff > 0 ? '+' : '') + weightDiff.toFixed(1) : '--'}
-              <span className="text-lg font-normal text-muted-foreground ml-1">kg</span>
+              <span className="text-base font-normal text-muted-foreground ml-1">kg</span>
             </div>
           </CardContent>
         </Card>
@@ -135,15 +134,20 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
 
       {/* Peso Inicial */}
       {initialWeight > 0 && (
-        <Card className="bg-card border-primary/30">
+        <Card className="bg-card border-primary/30 gaming-border">
           <CardContent className="p-4 flex justify-between items-center">
             <div>
-              <div className="text-xs text-muted-foreground uppercase tracking-wider">Peso Inicial</div>
-              <div className="text-xl font-bold text-primary">{initialWeight.toFixed(1)} kg</div>
+              <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Peso Inicial</div>
+              <div className="text-2xl font-black text-primary">{initialWeight.toFixed(1)} kg</div>
             </div>
             <div className="text-right">
-              <div className="text-xs text-muted-foreground uppercase tracking-wider">Meta</div>
-              <div className="text-sm text-muted-foreground">-{Math.abs(weightDiff).toFixed(1)} kg</div>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground uppercase tracking-wider mb-1">
+                <Target className="h-3 w-3" />
+                Progresso
+              </div>
+              <div className={`text-lg font-bold ${weightDiff < 0 ? 'text-[#22C55E]' : weightDiff > 0 ? 'text-accent' : 'text-foreground'}`}>
+                {weightDiff < 0 ? '' : '+'}{weightDiff.toFixed(1)} kg
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -153,16 +157,17 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <Button 
-            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 glow-yellow btn-gaming h-12 font-bold"
             disabled={!canAddWeight() && weights.length > 0}
           >
-            <Plus className="h-4 w-4 mr-2" />
+            <Plus className="h-5 w-5 mr-2" />
             {weights.length === 0 ? 'Registrar Peso Inicial' : 'Registrar Peso'}
           </Button>
         </DialogTrigger>
-        <DialogContent className="bg-card border-border">
+        <DialogContent className="bg-card border-border max-w-sm">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Scale className="h-5 w-5 text-primary" />
               {weights.length === 0 ? 'Peso Inicial' : 'Novo Registro de Peso'}
             </DialogTitle>
           </DialogHeader>
@@ -176,7 +181,7 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
                 placeholder="Ex: 75.5"
                 value={newWeight}
                 onChange={(e) => setNewWeight(e.target.value)}
-                className="bg-input border-border"
+                className="bg-input border-border text-lg h-12"
               />
             </div>
           </div>
@@ -197,16 +202,16 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
 
       {/* Aviso próximo registro */}
       {!canAddWeight() && weights.length > 0 && (
-        <div className="text-center text-sm text-muted-foreground">
-          <Calendar className="h-4 w-4 inline mr-2" />
-          Próximo registro em {daysUntilNextEntry()} dias
+        <div className="text-center text-sm text-muted-foreground bg-secondary/50 rounded-lg py-3 px-4">
+          <Calendar className="h-4 w-4 inline mr-2 text-primary" />
+          Próximo registro em <span className="font-bold text-primary">{daysUntilNextEntry()} dias</span>
         </div>
       )}
 
       {/* Histórico de Peso */}
       {weights.length > 0 && (
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="space-y-2">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground px-1">
             Histórico de Peso
           </h3>
           
@@ -216,9 +221,9 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
 
             return (
               <Card key={entry.id} className="bg-card border-border">
-                <CardContent className="p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`p-2 rounded-full ${
+                <CardContent className="p-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg ${
                       entry.type === 'initial' ? 'bg-primary/20' : 'bg-secondary'
                     }`}>
                       <Scale className={`h-4 w-4 ${
@@ -226,28 +231,28 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
                       }`} />
                     </div>
                     <div>
-                      <div className="font-medium">{entry.weight.toFixed(1)} kg</div>
-                      <div className="text-sm text-muted-foreground">{formatDate(entry.date)}</div>
+                      <div className="font-bold">{entry.weight.toFixed(1)} kg</div>
+                      <div className="text-xs text-muted-foreground">{formatDate(entry.date)}</div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     {diff !== 0 && (
-                      <span className={`text-sm font-medium ${
-                        diff < 0 ? 'text-green-500' : 'text-accent'
+                      <span className={`text-sm font-bold px-2 py-1 rounded ${
+                        diff < 0 ? 'bg-[#22C55E]/20 text-[#22C55E]' : 'bg-accent/20 text-accent'
                       }`}>
                         {diff > 0 ? '+' : ''}{diff.toFixed(1)}
                       </span>
                     )}
                     {entry.type === 'initial' && (
-                      <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
+                      <span className="text-[10px] bg-primary/20 text-primary px-2 py-1 rounded uppercase tracking-wider font-bold">
                         Inicial
                       </span>
                     )}
                     
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
@@ -281,8 +286,8 @@ export function WeightTracker({ weights, onWeightChanged }: WeightTrackerProps) 
       {weights.length === 0 && (
         <Card className="bg-card border-border">
           <CardContent className="p-8 text-center">
-            <Scale className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
-            <p className="text-muted-foreground">Nenhum peso registrado</p>
+            <Scale className="h-16 w-16 mx-auto mb-4 text-primary opacity-30" />
+            <p className="text-lg font-semibold">Nenhum peso registrado</p>
             <p className="text-sm text-muted-foreground mt-2">
               Registre seu peso inicial para acompanhar seu progresso
             </p>

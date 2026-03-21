@@ -1,10 +1,25 @@
 'use client'
 
-import { RunSession, WeightEntry } from './types'
+import { RunSession, WeightEntry, UserSettings } from './types'
 
-const RUNS_KEY = 'project_run_sessions'
-const WEIGHTS_KEY = 'project_run_weights'
+const RUNS_KEY = 'nitro_run_sessions'
+const WEIGHTS_KEY = 'nitro_run_weights'
+const SETTINGS_KEY = 'nitro_run_settings'
 
+// Configurações do usuário
+export function getSettings(): UserSettings {
+  if (typeof window === 'undefined') return { name: 'Corredor', weeklyGoalKm: 20, weight: 70 }
+  const data = localStorage.getItem(SETTINGS_KEY)
+  return data ? JSON.parse(data) : { name: 'Corredor', weeklyGoalKm: 20, weight: 70 }
+}
+
+export function saveSettings(settings: UserSettings): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+  }
+}
+
+// Corridas
 export function saveRun(run: RunSession): void {
   const runs = getRuns()
   runs.unshift(run)
@@ -26,6 +41,20 @@ export function deleteRun(id: string): void {
   }
 }
 
+// Calcula km desta semana
+export function getWeeklyDistance(): number {
+  const runs = getRuns()
+  const now = new Date()
+  const startOfWeek = new Date(now)
+  startOfWeek.setDate(now.getDate() - now.getDay()) // Domingo
+  startOfWeek.setHours(0, 0, 0, 0)
+
+  return runs
+    .filter(run => new Date(run.date) >= startOfWeek)
+    .reduce((total, run) => total + run.distance, 0)
+}
+
+// Peso
 export function saveWeight(entry: WeightEntry): void {
   const weights = getWeights()
   weights.unshift(entry)
@@ -97,4 +126,56 @@ export function formatPace(kmh: number): string {
 
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+}
+
+// Feedback sonoro
+export function playSound(type: 'start' | 'pause' | 'stop' | 'resume'): void {
+  if (typeof window === 'undefined') return
+  
+  const audioContext = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)()
+  const oscillator = audioContext.createOscillator()
+  const gainNode = audioContext.createGain()
+  
+  oscillator.connect(gainNode)
+  gainNode.connect(audioContext.destination)
+  
+  // Configurações baseadas no tipo
+  switch (type) {
+    case 'start':
+      oscillator.frequency.setValueAtTime(880, audioContext.currentTime) // A5
+      oscillator.frequency.setValueAtTime(1174.66, audioContext.currentTime + 0.1) // D6
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.3)
+      break
+    case 'pause':
+      oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime) // E5
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.2)
+      break
+    case 'resume':
+      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime) // C5
+      oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1) // E5
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.2)
+      break
+    case 'stop':
+      oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime) // C5
+      oscillator.frequency.setValueAtTime(392, audioContext.currentTime + 0.15) // G4
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4)
+      oscillator.start(audioContext.currentTime)
+      oscillator.stop(audioContext.currentTime + 0.4)
+      break
+  }
+  
+  // Vibração se disponível
+  if ('vibrate' in navigator) {
+    navigator.vibrate(type === 'start' ? [100, 50, 100] : type === 'stop' ? [200] : [50])
+  }
 }
