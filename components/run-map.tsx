@@ -1,8 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 import { GeoPosition } from '@/lib/types'
 
 interface RunMapProps {
@@ -12,16 +10,42 @@ interface RunMapProps {
   isPaused?: boolean
 }
 
+// Tipos para Leaflet
+type LeafletMap = any
+type LeafletMarker = any
+type LeafletPolyline = any
+
 export function RunMap({ position, path, isTracking, isPaused = false }: RunMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const mapInstanceRef = useRef<L.Map | null>(null)
-  const markerRef = useRef<L.Marker | null>(null)
-  const polylineRef = useRef<L.Polyline | null>(null)
-  const startMarkerRef = useRef<L.Marker | null>(null)
+  const mapInstanceRef = useRef<LeafletMap | null>(null)
+  const markerRef = useRef<LeafletMarker | null>(null)
+  const polylineRef = useRef<LeafletPolyline | null>(null)
+  const startMarkerRef = useRef<LeafletMarker | null>(null)
   const [mapReady, setMapReady] = useState(false)
+  const [leaflet, setLeaflet] = useState<any>(null)
+
+  // Carrega Leaflet dinamicamente no cliente
+  useEffect(() => {
+    let isMounted = true
+    
+    const loadLeaflet = async () => {
+      const L = (await import('leaflet')).default
+      await import('leaflet/dist/leaflet.css')
+      
+      if (isMounted) {
+        setLeaflet(L)
+      }
+    }
+    
+    loadLeaflet()
+    
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   // Cria o icone do marcador atual
-  const createCurrentIcon = () => {
+  const createCurrentIcon = (L: any) => {
     return L.divIcon({
       className: 'current-position-marker',
       html: `
@@ -74,7 +98,7 @@ export function RunMap({ position, path, isTracking, isPaused = false }: RunMapP
   }
 
   // Cria o icone do ponto inicial
-  const createStartIcon = () => {
+  const createStartIcon = (L: any) => {
     return L.divIcon({
       className: 'start-marker',
       html: `
@@ -92,10 +116,11 @@ export function RunMap({ position, path, isTracking, isPaused = false }: RunMapP
     })
   }
 
-  // Inicializa o mapa apenas uma vez
+  // Inicializa o mapa quando Leaflet estiver carregado
   useEffect(() => {
-    if (!mapContainerRef.current || mapInstanceRef.current) return
+    if (!leaflet || !mapContainerRef.current || mapInstanceRef.current) return
 
+    const L = leaflet
     const defaultCenter: [number, number] = position 
       ? [position.latitude, position.longitude] 
       : [-23.5505, -46.6333]
@@ -107,14 +132,15 @@ export function RunMap({ position, path, isTracking, isPaused = false }: RunMapP
       attributionControl: false,
     })
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
     }).addTo(map)
 
     mapInstanceRef.current = map
     setMapReady(true)
 
-    // Cleanup quando o componente for desmontado
+    // Cleanup
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove()
@@ -125,16 +151,17 @@ export function RunMap({ position, path, isTracking, isPaused = false }: RunMapP
         setMapReady(false)
       }
     }
-  }, [])
+  }, [leaflet])
 
   // Atualiza a posicao do marcador
   useEffect(() => {
-    if (!mapInstanceRef.current || !position || !mapReady) return
+    if (!leaflet || !mapInstanceRef.current || !position || !mapReady) return
 
+    const L = leaflet
     const latLng: [number, number] = [position.latitude, position.longitude]
 
     if (!markerRef.current) {
-      markerRef.current = L.marker(latLng, { icon: createCurrentIcon() }).addTo(mapInstanceRef.current)
+      markerRef.current = L.marker(latLng, { icon: createCurrentIcon(L) }).addTo(mapInstanceRef.current)
       mapInstanceRef.current.setView(latLng, 17)
     } else {
       markerRef.current.setLatLng(latLng)
@@ -142,12 +169,13 @@ export function RunMap({ position, path, isTracking, isPaused = false }: RunMapP
         mapInstanceRef.current.panTo(latLng, { animate: true, duration: 0.5 })
       }
     }
-  }, [position, isTracking, mapReady])
+  }, [leaflet, position, isTracking, mapReady])
 
   // Atualiza a linha do percurso
   useEffect(() => {
-    if (!mapInstanceRef.current || !mapReady) return
+    if (!leaflet || !mapInstanceRef.current || !mapReady) return
 
+    const L = leaflet
     const polylinePath = path.map(p => [p.lat, p.lng] as [number, number])
 
     if (polylinePath.length > 1) {
@@ -166,15 +194,15 @@ export function RunMap({ position, path, isTracking, isPaused = false }: RunMapP
 
     // Marcador de inicio
     if (polylinePath.length > 0 && !startMarkerRef.current) {
-      startMarkerRef.current = L.marker(polylinePath[0], { icon: createStartIcon() }).addTo(mapInstanceRef.current)
+      startMarkerRef.current = L.marker(polylinePath[0], { icon: createStartIcon(L) }).addTo(mapInstanceRef.current)
     }
-  }, [path, mapReady])
+  }, [leaflet, path, mapReady])
 
   return (
     <div className="relative w-full h-[280px] md:h-[350px] rounded-xl overflow-hidden gaming-border">
       <div 
         ref={mapContainerRef} 
-        style={{ height: '100%', width: '100%' }}
+        style={{ height: '100%', width: '100%', background: '#1a1a2e' }}
       />
       
       {/* Overlay gradiente nas bordas */}
@@ -183,8 +211,18 @@ export function RunMap({ position, path, isTracking, isPaused = false }: RunMapP
         <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-background/80 to-transparent"></div>
       </div>
       
+      {/* Loading do mapa */}
+      {!mapReady && (
+        <div className="absolute inset-0 bg-background/90 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center p-6">
+            <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <div className="text-primary text-lg font-bold tracking-wider">CARREGANDO MAPA</div>
+          </div>
+        </div>
+      )}
+      
       {/* Overlay quando nao tem posicao */}
-      {!position && (
+      {mapReady && !position && (
         <div className="absolute inset-0 bg-background/90 backdrop-blur-sm flex items-center justify-center">
           <div className="text-center p-6">
             <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>

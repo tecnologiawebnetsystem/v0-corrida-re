@@ -247,7 +247,7 @@
 }
 
 .leaflet-tile-pane {
-  filter: saturate(0.7) brightness(0.7) contrast(1.1);
+  filter: saturate(1) brightness(1) contrast(1);
 }
 
 .current-position-marker {
