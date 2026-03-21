@@ -25,6 +25,13 @@ export default function HomePage() {
 
   useEffect(() => {
     loadData()
+    
+    // Registrar Service Worker para PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // SW registration failed silently
+      })
+    }
   }, [])
 
   const handleRunComplete = () => {

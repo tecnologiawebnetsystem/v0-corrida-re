@@ -1,6 +1,11 @@
 'use client'
 
-// Mapa usando Leaflet API direta (sem react-leaflet)
+/**
+ * Componente de Mapa - PULSE RUN
+ * Usa Leaflet API direta (NÃO usa react-leaflet)
+ * Carrega leaflet dinamicamente no useEffect para evitar erro SSR "window is not defined"
+ * Atualizado: v2
+ */
 import { useEffect, useRef, useState } from 'react'
 import { GeoPosition } from '@/lib/types'
 import { ZoomIn, ZoomOut, Crosshair, Layers } from 'lucide-react'
