@@ -50,7 +50,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h1 className="text-xl font-black tracking-tight">
-                  NITRO<span className="text-primary">_RUN</span>
+                  PULSE<span className="text-primary">_RUN</span>
                 </h1>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
                   Olá, {userName}
@@ -137,7 +137,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <Zap className="h-3 w-3 text-primary" />
-              <span className="text-muted-foreground">NITRO_RUN</span>
+              <span className="text-muted-foreground">PULSE_RUN</span>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-muted-foreground">

@@ -16,7 +16,7 @@ const rajdhani = Rajdhani({
 })
 
 export const metadata: Metadata = {
-  title: 'NITRO RUN - Rastreador de Corrida',
+  title: 'PULSE RUN - Rastreador de Corrida',
   description: 'Acompanhe suas corridas com GPS em tempo real, monitore seu progresso e alcance seus objetivos',
   generator: 'v0.app',
 }
