@@ -17,15 +17,15 @@ const rajdhani = Rajdhani({
 })
 
 export const metadata: Metadata = {
-  title: 'Proofy One - Rastreador de Corrida',
+  title: 'PULSE RUN - Rastreador de Corrida',
   description: 'Acompanhe suas corridas com GPS em tempo real, monitore seu progresso e alcance seus objetivos fitness',
   generator: 'v0.app',
   manifest: '/manifest.json',
-  applicationName: 'Proofy One',
+  applicationName: 'PULSE RUN',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'Proofy One',
+    title: 'PULSE RUN',
     startupImage: [
       {
         url: '/icon-512.jpg',
@@ -64,14 +64,14 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    siteName: 'Proofy One',
-    title: 'Proofy One - Rastreador de Corrida',
+    siteName: 'PULSE RUN',
+    title: 'PULSE RUN - Rastreador de Corrida',
     description: 'Acompanhe suas corridas com GPS em tempo real, monitore seu progresso e alcance seus objetivos fitness',
-    images: [{ url: '/icon-512.jpg', width: 512, height: 512, alt: 'Proofy One' }],
+    images: [{ url: '/icon-512.jpg', width: 512, height: 512, alt: 'PULSE RUN' }],
   },
   twitter: {
     card: 'summary',
-    title: 'Proofy One - Rastreador de Corrida',
+    title: 'PULSE RUN - Rastreador de Corrida',
     description: 'Acompanhe suas corridas com GPS em tempo real',
     images: ['/icon-512.jpg'],
   },
@@ -111,7 +111,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.jpg" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        <meta name="apple-mobile-web-app-title" content="Proofy One" />
+        <meta name="apple-mobile-web-app-title" content="PULSE RUN" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>

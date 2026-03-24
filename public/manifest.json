@@ -1,6 +1,6 @@
 {
-  "name": "Proofy One - Rastreador de Corrida",
-  "short_name": "Proofy One",
+  "name": "PULSE RUN - Rastreador de Corrida",
+  "short_name": "PULSE RUN",
   "description": "Acompanhe suas corridas com GPS em tempo real, monitore seu progresso e alcance seus objetivos fitness",
   "start_url": "/",
   "id": "/",
@@ -43,7 +43,7 @@
       "sizes": "512x512",
       "type": "image/jpeg",
       "form_factor": "narrow",
-      "label": "Tela inicial do Proofy One"
+      "label": "Tela inicial do PULSE RUN"
     }
   ],
   "shortcuts": [
