@@ -25,13 +25,6 @@ export default function HomePage() {
 
   useEffect(() => {
     loadData()
-    
-    // Registrar Service Worker para PWA
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => {
-        // SW registration failed silently
-      })
-    }
   }, [])
 
   const handleRunComplete = () => {
@@ -40,9 +33,9 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background grid-pattern">
+    <div className="min-h-screen min-h-[100dvh] bg-background grid-pattern overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
+      <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border safe-area-top">
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -57,7 +50,7 @@ export default function HomePage() {
               </div>
               <div>
                 <h1 className="text-xl font-black tracking-tight">
-                  PULSE<span className="text-primary">_RUN</span>
+                  PROOFY<span className="text-primary">_ONE</span>
                 </h1>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
                   Olá, {userName}
@@ -87,35 +80,35 @@ export default function HomePage() {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-4 pb-24">
+      <main className="container mx-auto px-4 py-4 pb-24 safe-area-bottom">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4 bg-card border border-border p-1 h-12">
+          <TabsList className="grid w-full grid-cols-4 bg-card border border-border p-1 h-14 touch-manipulation">
             <TabsTrigger 
               value="run" 
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5 text-xs font-semibold"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center justify-center gap-1.5 text-xs font-semibold h-full haptic-feedback active:scale-95 transition-transform"
             >
-              <Activity className="h-4 w-4" />
+              <Activity className="h-5 w-5" />
               <span className="hidden sm:inline">Correr</span>
             </TabsTrigger>
             <TabsTrigger 
               value="history"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5 text-xs font-semibold"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center justify-center gap-1.5 text-xs font-semibold h-full haptic-feedback active:scale-95 transition-transform"
             >
-              <History className="h-4 w-4" />
+              <History className="h-5 w-5" />
               <span className="hidden sm:inline">Histórico</span>
             </TabsTrigger>
             <TabsTrigger 
               value="stats"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5 text-xs font-semibold"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center justify-center gap-1.5 text-xs font-semibold h-full haptic-feedback active:scale-95 transition-transform"
             >
-              <BarChart3 className="h-4 w-4" />
+              <BarChart3 className="h-5 w-5" />
               <span className="hidden sm:inline">Stats</span>
             </TabsTrigger>
             <TabsTrigger 
               value="weight"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center gap-1.5 text-xs font-semibold"
+              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground flex items-center justify-center gap-1.5 text-xs font-semibold h-full haptic-feedback active:scale-95 transition-transform"
             >
-              <Scale className="h-4 w-4" />
+              <Scale className="h-5 w-5" />
               <span className="hidden sm:inline">Peso</span>
             </TabsTrigger>
           </TabsList>
@@ -139,12 +132,12 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border">
-        <div className="container mx-auto px-4 py-2">
+      <footer className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border z-40">
+        <div className="container mx-auto px-4 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <Zap className="h-3 w-3 text-primary" />
-              <span className="text-muted-foreground">PULSE_RUN</span>
+              <span className="text-muted-foreground">PROOFY_ONE</span>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-muted-foreground">

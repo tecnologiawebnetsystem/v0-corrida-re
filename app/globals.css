@@ -301,3 +301,316 @@
 .share-btn-facebook {
   background: #1877F2;
 }
+
+/* ========================================
+   PWA & MOBILE OPTIMIZATIONS
+   ======================================== */
+
+/* Safe Area Insets for iOS notch and home indicator */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+/* Prevent overscroll/bounce on iOS */
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text selection on mobile UI elements */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Touch feedback optimizations */
+button, a, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Smooth scrolling for mobile */
+.scroll-smooth {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* PWA Standalone Mode Styles */
+@media (display-mode: standalone) {
+  body {
+    padding-top: var(--safe-area-inset-top);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+    padding-right: var(--safe-area-inset-right);
+  }
+  
+  /* Adjust header for standalone */
+  header.sticky {
+    top: var(--safe-area-inset-top);
+  }
+  
+  /* Adjust footer for standalone */
+  footer.fixed {
+    padding-bottom: calc(0.5rem + var(--safe-area-inset-bottom));
+  }
+}
+
+/* Mobile-Only Styles (max-width: 767px) */
+@media screen and (max-width: 767px) {
+  /* Larger touch targets */
+  button, a, [role="button"], .btn-gaming {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Optimized font sizes for mobile */
+  html {
+    font-size: 16px;
+  }
+  
+  /* Full width inputs on mobile */
+  input, select, textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+  
+  /* Mobile card optimizations */
+  .stats-card {
+    padding: 1rem;
+  }
+  
+  /* Optimized spacing */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Bottom nav safe area */
+  .pb-safe {
+    padding-bottom: calc(1.5rem + var(--safe-area-inset-bottom));
+  }
+}
+
+/* Tablet Styles (768px - 1024px) */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+  /* Tablet-optimized layout */
+  .container {
+    max-width: 720px;
+  }
+  
+  /* Two column grid for tablets */
+  .tablet-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  /* Larger touch targets for tablets */
+  button, a, [role="button"] {
+    min-height: 48px;
+  }
+  
+  /* Optimized card sizes */
+  .stats-card {
+    padding: 1.25rem;
+  }
+}
+
+/* Landscape Mobile Optimizations */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  /* Compact header in landscape */
+  header {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+  }
+  
+  /* Scrollable content area */
+  main {
+    overflow-y: auto;
+    max-height: calc(100vh - 120px);
+  }
+  
+  /* Hide footer in landscape to save space */
+  footer.fixed {
+    display: none;
+  }
+}
+
+/* Dark mode adjustments for OLED screens */
+@media (prefers-color-scheme: dark) {
+  .dark {
+    --background: #000000;
+    --card: #0A0A0A;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  .pulse-yellow,
+  .pulse-red,
+  .scan-line::after,
+  .gaming-border {
+    animation: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: #444444;
+    --muted-foreground: #C0C0C0;
+  }
+  
+  .stats-card {
+    border-width: 2px;
+  }
+}
+
+/* Haptic feedback visual indicator */
+.haptic-feedback:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease;
+}
+
+/* Pull to refresh indicator area */
+.ptr-element {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  pointer-events: none;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+/* Active run indicator animation */
+@keyframes run-active {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.run-active-indicator {
+  animation: run-active 1.5s ease-in-out infinite;
+}
+
+/* Battery saver mode - reduce animations */
+@media (prefers-reduced-motion: reduce), (update: slow) {
+  .glow-yellow,
+  .glow-red,
+  .glow-blue {
+    box-shadow: none;
+    border: 2px solid currentColor;
+  }
+}
+
+/* Safe Area Classes */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-area-left {
+  padding-left: env(safe-area-inset-left, 0px);
+}
+
+.safe-area-right {
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+.safe-area-all {
+  padding: env(safe-area-inset-top, 0px) 
+           env(safe-area-inset-right, 0px) 
+           env(safe-area-inset-bottom, 0px) 
+           env(safe-area-inset-left, 0px);
+}
+
+/* Touch manipulation for better mobile interaction */
+.touch-manipulation {
+  touch-action: manipulation;
+}
+
+/* Smooth touch scrolling */
+.touch-scroll {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* iOS momentum scrolling */
+.momentum-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent callout on long press (iOS) */
+.no-callout {
+  -webkit-touch-callout: none;
+}
+
+/* Full height accounting for mobile browser UI */
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Dynamic viewport height for mobile */
+@supports (height: 100dvh) {
+  .h-screen-dynamic {
+    height: 100dvh;
+  }
+  
+  .min-h-screen-dynamic {
+    min-height: 100dvh;
+  }
+}
+
+/* Standalone app mode - hide browser UI specific elements */
+@media (display-mode: standalone) {
+  .hide-in-app {
+    display: none !important;
+  }
+  
+  .show-in-app {
+    display: block !important;
+  }
+}
+
+/* Only show in browser mode */
+@media not (display-mode: standalone) {
+  .show-in-app {
+    display: none !important;
+  }
+}
