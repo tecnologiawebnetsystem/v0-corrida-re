@@ -50,10 +50,10 @@ export default function HomePage() {
               </div>
               <div>
                 <h1 className="text-xl font-black tracking-tight">
-                  PROOFY<span className="text-primary">_ONE</span>
+                  PULSE <span className="text-primary">RUN</span>
                 </h1>
                 <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
-                  Olá, {userName}
+                  Olá, Kleber Gonçalves
                 </p>
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function HomePage() {
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <Zap className="h-3 w-3 text-primary" />
-              <span className="text-muted-foreground">PROOFY_ONE</span>
+              <span className="text-muted-foreground">PULSE RUN</span>
             </div>
             <div className="flex items-center gap-4">
               <span className="text-muted-foreground">
