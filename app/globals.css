@@ -342,17 +342,7 @@ button, a, [role="button"] {
 
 /* PWA Standalone Mode Styles */
 @media (display-mode: standalone) {
-  body {
-    padding-top: var(--safe-area-inset-top);
-    padding-bottom: var(--safe-area-inset-bottom);
-    padding-left: var(--safe-area-inset-left);
-    padding-right: var(--safe-area-inset-right);
-  }
-  
-  /* Adjust header for standalone */
-  header.sticky {
-    top: var(--safe-area-inset-top);
-  }
+  /* Não adicionar padding no body — o header já cuida do safe-area via classe */
   
   /* Adjust footer for standalone */
   footer.fixed {

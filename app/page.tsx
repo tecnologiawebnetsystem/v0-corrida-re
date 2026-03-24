@@ -35,7 +35,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen min-h-[100dvh] bg-background grid-pattern overflow-x-hidden">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border safe-area-top">
+      <header className="sticky top-0 z-50 bg-background/90 backdrop-blur-md border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -132,8 +132,8 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border z-40">
-        <div className="container mx-auto px-4 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+      <footer className="fixed bottom-0 left-0 right-0 bg-background/90 backdrop-blur-md border-t border-border z-40" style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}>
+        <div className="container mx-auto px-4 py-2">
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-2">
               <Zap className="h-3 w-3 text-primary" />
