@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Orbitron, Rajdhani } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { PWAProvider } from '@/components/pwa-provider'
 import './globals.css'
 
 const orbitron = Orbitron({ 
@@ -16,28 +17,86 @@ const rajdhani = Rajdhani({
 })
 
 export const metadata: Metadata = {
-  title: 'PULSE RUN - Rastreador de Corrida',
-  description: 'Acompanhe suas corridas com GPS em tempo real, monitore seu progresso e alcance seus objetivos',
+  title: 'Proofy One - Rastreador de Corrida',
+  description: 'Acompanhe suas corridas com GPS em tempo real, monitore seu progresso e alcance seus objetivos fitness',
   generator: 'v0.app',
   manifest: '/manifest.json',
+  applicationName: 'Proofy One',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'black-translucent',
-    title: 'PULSE RUN',
+    title: 'Proofy One',
+    startupImage: [
+      {
+        url: '/icon-512.jpg',
+        media: '(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/icon-512.jpg',
+        media: '(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/icon-512.jpg',
+        media: '(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)',
+      },
+      {
+        url: '/icon-512.jpg',
+        media: '(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)',
+      },
+      {
+        url: '/icon-512.jpg',
+        media: '(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)',
+      },
+    ],
+  },
+  formatDetection: {
+    telephone: false,
   },
   icons: {
-    icon: '/icon-512.jpg',
-    apple: '/icon-192.jpg',
+    icon: [
+      { url: '/icon-192.jpg', sizes: '192x192', type: 'image/jpeg' },
+      { url: '/icon-512.jpg', sizes: '512x512', type: 'image/jpeg' },
+    ],
+    apple: [
+      { url: '/icon-192.jpg', sizes: '192x192', type: 'image/jpeg' },
+      { url: '/icon-512.jpg', sizes: '512x512', type: 'image/jpeg' },
+    ],
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'Proofy One',
+    title: 'Proofy One - Rastreador de Corrida',
+    description: 'Acompanhe suas corridas com GPS em tempo real, monitore seu progresso e alcance seus objetivos fitness',
+    images: [{ url: '/icon-512.jpg', width: 512, height: 512, alt: 'Proofy One' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Proofy One - Rastreador de Corrida',
+    description: 'Acompanhe suas corridas com GPS em tempo real',
+    images: ['/icon-512.jpg'],
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'msapplication-TileColor': '#050505',
+    'msapplication-TileImage': '/icon-512.jpg',
+    'msapplication-tap-highlight': 'no',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#FFD60A',
+  themeColor: [
+    { media: '(prefers-color-scheme: dark)', color: '#050505' },
+    { media: '(prefers-color-scheme: light)', color: '#FFD60A' },
+  ],
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
+  minimumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
+  interactiveWidget: 'resizes-visual',
 }
 
 export default function RootLayout({
@@ -46,9 +105,20 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="pt-BR" className="dark">
-      <body className={`${orbitron.variable} ${rajdhani.variable} font-sans antialiased`}>
-        {children}
+    <html lang="pt-BR" className="dark" suppressHydrationWarning>
+      <head>
+        <link rel="apple-touch-icon" href="/icon-192.jpg" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.jpg" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Proofy One" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+      </head>
+      <body className={`${orbitron.variable} ${rajdhani.variable} font-sans antialiased overflow-x-hidden`}>
+        <PWAProvider>
+          {children}
+        </PWAProvider>
         <Analytics />
       </body>
     </html>
