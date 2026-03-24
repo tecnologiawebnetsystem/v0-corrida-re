@@ -1,6 +1,6 @@
-const CACHE_NAME = 'proofy-one-v2';
-const STATIC_CACHE = 'proofy-one-static-v2';
-const DYNAMIC_CACHE = 'proofy-one-dynamic-v2';
+const CACHE_NAME = 'pulse-run-v3';
+const STATIC_CACHE = 'pulse-run-static-v3';
+const DYNAMIC_CACHE = 'pulse-run-dynamic-v3';
 
 const STATIC_ASSETS = [
   '/',
@@ -101,6 +101,13 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
+// Mensagem para forcar atualizacao imediata
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 // Background sync for offline data
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-runs') {
@@ -131,7 +138,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification('Proofy One', options)
+    self.registration.showNotification('PULSE RUN', options)
   );
 });
 
