@@ -34,6 +34,58 @@ function calculateDistance(
   return R * c
 }
 
+/**
+ * Obtém a posição atual com alta precisão, ignorando qualquer cache do sistema.
+ * Estratégia dupla: primeiro tenta sem timeout longo; se vier posição imprecisa (>200m),
+ * tenta novamente para forçar leitura do GPS real do dispositivo.
+ */
+function fetchFreshPosition(
+  onSuccess: (pos: GeolocationPosition) => void,
+  onError: (err: GeolocationPositionError) => void
+) {
+  if (!navigator.geolocation) {
+    onError({ code: 2, message: 'Geolocalização não suportada', PERMISSION_DENIED: 1, POSITION_UNAVAILABLE: 2, TIMEOUT: 3 } as GeolocationPositionError)
+    return
+  }
+
+  // Primeira tentativa: sem cache, timeout rápido (5s)
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      // Se a precisão for muito ruim (>500m = provavelmente cache ou IP), tenta de novo com mais tempo
+      if (pos.coords.accuracy > 500) {
+        navigator.geolocation.getCurrentPosition(
+          onSuccess,
+          onError,
+          {
+            enableHighAccuracy: true,
+            timeout: 20000,
+            maximumAge: 0,
+          }
+        )
+      } else {
+        onSuccess(pos)
+      }
+    },
+    () => {
+      // Se a primeira falhou por timeout, tenta com mais tempo
+      navigator.geolocation.getCurrentPosition(
+        onSuccess,
+        onError,
+        {
+          enableHighAccuracy: true,
+          timeout: 20000,
+          maximumAge: 0,
+        }
+      )
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 8000,
+      maximumAge: 0, // Nunca usar cache — força o GPS real
+    }
+  )
+}
+
 export function useGeolocation() {
   const [state, setState] = useState<GeolocationState>({
     position: null,
@@ -51,7 +103,7 @@ export function useGeolocation() {
   const pausedDistanceRef = useRef<number>(0)
   const pausedPathRef = useRef<{ lat: number; lng: number }[]>([])
 
-  // Obter localização atual (uma vez)
+  // Obter localização atual (uma vez) — sem cache, forçando GPS real
   const getCurrentLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setState((prev) => ({
@@ -61,7 +113,7 @@ export function useGeolocation() {
       return
     }
 
-    navigator.geolocation.getCurrentPosition(
+    fetchFreshPosition(
       (pos) => {
         setState((prev) => ({
           ...prev,
@@ -82,15 +134,14 @@ export function useGeolocation() {
             errorMsg = 'Permissão de localização negada. Ative nas configurações do navegador.'
             break
           case err.POSITION_UNAVAILABLE:
-            errorMsg = 'Localização indisponível'
+            errorMsg = 'Localização indisponível. Certifique-se de estar com GPS ativado.'
             break
           case err.TIMEOUT:
-            errorMsg = 'Tempo limite excedido'
+            errorMsg = 'Tempo limite excedido. Verifique se o GPS está ativado.'
             break
         }
         setState((prev) => ({ ...prev, error: errorMsg }))
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      }
     )
   }, [])
 
@@ -118,6 +169,9 @@ export function useGeolocation() {
 
     watchIdRef.current = navigator.geolocation.watchPosition(
       (pos) => {
+        // Ignorar posições com precisão muito ruim durante o rastreamento
+        if (pos.coords.accuracy > 100) return
+
         const newPosition: GeoPosition = {
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
@@ -155,8 +209,10 @@ export function useGeolocation() {
             }
           }
 
-          // Só adiciona ao path se moveu mais de 3 metros e precisão boa
-          const shouldAddToPath = (distance >= 3 || !lastPositionRef.current) && newPosition.accuracy < 30
+          // Só adiciona ao path se moveu mais de 3 metros e precisão boa (< 30m)
+          const shouldAddToPath =
+            (distance >= 3 || !lastPositionRef.current) &&
+            newPosition.accuracy < 30
 
           if (shouldAddToPath) {
             lastPositionRef.current = newPosition
@@ -181,18 +237,18 @@ export function useGeolocation() {
             errorMsg = 'Permissão de localização negada. Ative nas configurações do navegador.'
             break
           case err.POSITION_UNAVAILABLE:
-            errorMsg = 'Localização indisponível'
+            errorMsg = 'Localização indisponível. Verifique se o GPS está ativado.'
             break
           case err.TIMEOUT:
-            errorMsg = 'Tempo limite excedido'
+            errorMsg = 'Tempo limite excedido ao rastrear.'
             break
         }
         setState((prev) => ({ ...prev, error: errorMsg }))
       },
       {
         enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
+        timeout: 30000, // Mais tolerante durante rastreamento contínuo
+        maximumAge: 0,  // Nunca usar cache durante corrida
       }
     )
   }, [])
@@ -235,7 +291,7 @@ export function useGeolocation() {
     pausedPathRef.current = []
   }, [stopTracking])
 
-  // Obter localização inicial ao montar
+  // Obter localização inicial ao montar — sem cache
   useEffect(() => {
     getCurrentLocation()
   }, [getCurrentLocation])

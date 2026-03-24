@@ -2,7 +2,7 @@
 
 import { useEffect, useState, createContext, useContext, ReactNode } from 'react'
 import { Button } from '@/components/ui/button'
-import { Download, X, Zap } from 'lucide-react'
+import { Download, X, Zap, RefreshCw, Bell, BellOff } from 'lucide-react'
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[]
@@ -18,7 +18,9 @@ interface PWAContextType {
   isStandalone: boolean
   canInstall: boolean
   isOnline: boolean
+  notificationPermission: NotificationPermission | null
   installApp: () => Promise<void>
+  requestNotificationPermission: () => Promise<void>
 }
 
 const PWAContext = createContext<PWAContextType>({
@@ -26,7 +28,9 @@ const PWAContext = createContext<PWAContextType>({
   isStandalone: false,
   canInstall: false,
   isOnline: true,
+  notificationPermission: null,
   installApp: async () => {},
+  requestNotificationPermission: async () => {},
 })
 
 export function usePWA() {
@@ -40,20 +44,27 @@ export function PWAProvider({ children }: { children: ReactNode }) {
   const [isOnline, setIsOnline] = useState(true)
   const [showInstallBanner, setShowInstallBanner] = useState(false)
   const [showIOSInstructions, setShowIOSInstructions] = useState(false)
+  const [showUpdateBanner, setShowUpdateBanner] = useState(false)
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null)
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null)
 
   useEffect(() => {
+    // Verificar permissão de notificação existente
+    if ('Notification' in window) {
+      setNotificationPermission(Notification.permission)
+    }
+
     // Check if running in standalone mode
     const checkStandalone = () => {
-      const isStandaloneMode = 
+      const isStandaloneMode =
         window.matchMedia('(display-mode: standalone)').matches ||
         (window.navigator as { standalone?: boolean }).standalone === true ||
-        document.referrer.includes('android-app://');
+        document.referrer.includes('android-app://')
       setIsStandalone(isStandaloneMode)
       setIsInstalled(isStandaloneMode)
     }
     checkStandalone()
 
-    // Listen for display mode changes
     const mediaQuery = window.matchMedia('(display-mode: standalone)')
     const handleChange = () => checkStandalone()
     mediaQuery.addEventListener('change', handleChange)
@@ -62,22 +73,18 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
-      
-      // Check if user has dismissed before
       const dismissed = localStorage.getItem('pwa-install-dismissed')
       if (!dismissed) {
         setTimeout(() => setShowInstallBanner(true), 3000)
       }
     }
 
-    // Handle app installed event
     const handleAppInstalled = () => {
       setIsInstalled(true)
       setShowInstallBanner(false)
       setDeferredPrompt(null)
     }
 
-    // Handle online/offline status
     const handleOnline = () => setIsOnline(true)
     const handleOffline = () => setIsOnline(false)
 
@@ -85,38 +92,59 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     window.addEventListener('appinstalled', handleAppInstalled)
     window.addEventListener('online', handleOnline)
     window.addEventListener('offline', handleOffline)
-    
+
     setIsOnline(navigator.onLine)
 
-    // Register Service Worker
+    // Registrar Service Worker e monitorar atualizações
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/sw.js', { scope: '/' })
         .then((registration) => {
-          // Check for updates
+          // Checar se já há um worker esperando (atualização pendente)
+          if (registration.waiting) {
+            setWaitingWorker(registration.waiting)
+            setShowUpdateBanner(true)
+          }
+
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                  // New content is available
-                  if (confirm('Nova versão disponível! Deseja atualizar?')) {
-                    window.location.reload()
+                  setWaitingWorker(newWorker)
+                  setShowUpdateBanner(true)
+
+                  // Notificação push de atualização (se permitida)
+                  if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification('PULSE RUN - Atualização disponivel', {
+                      body: 'Uma nova versao do app esta disponivel. Clique para atualizar.',
+                      icon: '/icon-192.jpg',
+                      badge: '/icon-192.jpg',
+                      tag: 'app-update',
+                    })
                   }
                 }
               })
             }
           })
+
+          // Escutar mensagem do SW para recarregar
+          navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload()
+          })
         })
         .catch(() => {
-          // SW registration failed
+          // SW registration failed silently
         })
     }
 
-    // Check if iOS device without install prompt
+    // iOS sem prompt de instalação
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
     const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)
-    if (isIOS && isSafari && !isStandaloneMode) {
+    const isStandaloneNow =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as { standalone?: boolean }).standalone === true
+    if (isIOS && isSafari && !isStandaloneNow) {
       const dismissed = localStorage.getItem('pwa-ios-dismissed')
       if (!dismissed) {
         setTimeout(() => setShowIOSInstructions(true), 5000)
@@ -134,19 +162,45 @@ export function PWAProvider({ children }: { children: ReactNode }) {
 
   const installApp = async () => {
     if (!deferredPrompt) return
-
     try {
       await deferredPrompt.prompt()
       const { outcome } = await deferredPrompt.userChoice
-      
       if (outcome === 'accepted') {
         setIsInstalled(true)
       }
-      
       setDeferredPrompt(null)
       setShowInstallBanner(false)
     } catch {
       // Install failed
+    }
+  }
+
+  const applyUpdate = () => {
+    if (waitingWorker) {
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' })
+    }
+    setShowUpdateBanner(false)
+  }
+
+  const dismissUpdateBanner = () => {
+    setShowUpdateBanner(false)
+  }
+
+  const requestNotificationPermission = async () => {
+    if (!('Notification' in window)) return
+    try {
+      const permission = await Notification.requestPermission()
+      setNotificationPermission(permission)
+      if (permission === 'granted') {
+        new Notification('PULSE RUN', {
+          body: 'Notificacoes ativadas! Voce sera avisado sobre atualizacoes.',
+          icon: '/icon-192.jpg',
+          badge: '/icon-192.jpg',
+          tag: 'notifications-enabled',
+        })
+      }
+    } catch {
+      // Notifications not supported
     }
   }
 
@@ -160,57 +214,59 @@ export function PWAProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('pwa-ios-dismissed', 'true')
   }
 
-  const isStandaloneMode = typeof window !== 'undefined' && 
+  const isStandaloneMode =
+    typeof window !== 'undefined' &&
     (window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as { standalone?: boolean }).standalone === true)
+      (window.navigator as { standalone?: boolean }).standalone === true)
 
   return (
-    <PWAContext.Provider 
-      value={{ 
-        isInstalled, 
-        isStandalone: isStandaloneMode, 
+    <PWAContext.Provider
+      value={{
+        isInstalled,
+        isStandalone: isStandaloneMode,
         canInstall: !!deferredPrompt,
         isOnline,
-        installApp 
+        notificationPermission,
+        installApp,
+        requestNotificationPermission,
       }}
     >
       {children}
-      
-      {/* Install Banner for Android/Chrome */}
-      {showInstallBanner && !isInstalled && (
-        <div className="fixed bottom-20 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-300">
-          <div className="bg-card border border-primary/30 rounded-2xl p-4 shadow-lg glow-yellow">
+
+      {/* Banner de Atualização Disponivel */}
+      {showUpdateBanner && (
+        <div className="fixed top-4 left-4 right-4 z-[200] animate-in slide-in-from-top-4 duration-300">
+          <div className="bg-card border border-primary/50 rounded-2xl p-4 shadow-xl">
             <div className="flex items-start gap-3">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary via-accent to-[#3B82F6] p-[2px] shrink-0">
-                <div className="h-full w-full rounded-xl bg-card flex items-center justify-center">
-                  <Zap className="h-6 w-6 text-primary" />
-                </div>
+              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <RefreshCw className="h-5 w-5 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-foreground">Instalar Proofy One</h3>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Adicione à tela inicial para acesso rápido e funcionar offline
+                <h3 className="font-bold text-foreground text-sm">Nova versao disponivel!</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  PULSE RUN foi atualizado. Clique em Atualizar para aplicar.
                 </p>
               </div>
-              <button 
-                onClick={dismissBanner}
-                className="text-muted-foreground hover:text-foreground"
+              <button
+                onClick={dismissUpdateBanner}
+                className="text-muted-foreground hover:text-foreground shrink-0"
+                aria-label="Fechar"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
             <div className="flex gap-2 mt-3">
-              <Button 
-                onClick={installApp}
-                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+              <Button
+                onClick={applyUpdate}
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 h-9 text-sm"
               >
-                <Download className="h-4 w-4 mr-2" />
-                Instalar
+                <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+                Atualizar agora
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={dismissBanner}
-                className="flex-1"
+              <Button
+                variant="outline"
+                onClick={dismissUpdateBanner}
+                className="flex-1 h-9 text-sm"
               >
                 Depois
               </Button>
@@ -219,48 +275,85 @@ export function PWAProvider({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      {/* iOS Install Instructions */}
+      {/* Banner de Instalacao Android/Chrome */}
+      {showInstallBanner && !isInstalled && (
+        <div className="fixed bottom-20 left-4 right-4 z-[100] animate-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-card border border-primary/30 rounded-2xl p-4 shadow-lg">
+            <div className="flex items-start gap-3">
+              <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Zap className="h-6 w-6 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-foreground">Instalar PULSE RUN</h3>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Adicione a tela inicial para acesso rapido e uso offline
+                </p>
+              </div>
+              <button
+                onClick={dismissBanner}
+                className="text-muted-foreground hover:text-foreground"
+                aria-label="Fechar"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <Button
+                onClick={installApp}
+                className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Instalar
+              </Button>
+              <Button variant="outline" onClick={dismissBanner} className="flex-1">
+                Depois
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Instrucoes de instalacao iOS */}
       {showIOSInstructions && !isStandaloneMode && (
         <div className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-sm flex items-end animate-in fade-in duration-300">
           <div className="w-full bg-card border-t border-primary/30 rounded-t-3xl p-6 pb-8 animate-in slide-in-from-bottom duration-300">
-            <button 
+            <button
               onClick={dismissIOSInstructions}
               className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              aria-label="Fechar"
             >
               <X className="h-6 w-6" />
             </button>
-            
+
             <div className="flex items-center gap-3 mb-4">
-              <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-primary via-accent to-[#3B82F6] p-[2px]">
-                <div className="h-full w-full rounded-2xl bg-card flex items-center justify-center">
-                  <Zap className="h-7 w-7 text-primary" />
-                </div>
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <Zap className="h-7 w-7 text-primary" />
               </div>
               <div>
-                <h3 className="font-bold text-xl text-foreground">Instalar Proofy One</h3>
-                <p className="text-sm text-muted-foreground">Adicione à tela inicial</p>
+                <h3 className="font-bold text-xl text-foreground">Instalar PULSE RUN</h3>
+                <p className="text-sm text-muted-foreground">Adicione a tela inicial</p>
               </div>
             </div>
-            
+
             <div className="space-y-4 mb-6">
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
                   1
                 </div>
                 <p className="text-foreground">
-                  Toque no ícone de <strong>Compartilhar</strong> na barra inferior
+                  Toque no icone de <strong>Compartilhar</strong> na barra inferior
                 </p>
               </div>
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
                   2
                 </div>
                 <p className="text-foreground">
-                  Role para baixo e toque em <strong>Adicionar à Tela de Início</strong>
+                  Role para baixo e toque em <strong>Adicionar a Tela de Inicio</strong>
                 </p>
               </div>
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
+                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
                   3
                 </div>
                 <p className="text-foreground">
@@ -268,8 +361,8 @@ export function PWAProvider({ children }: { children: ReactNode }) {
                 </p>
               </div>
             </div>
-            
-            <Button 
+
+            <Button
               onClick={dismissIOSInstructions}
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12"
             >
@@ -279,12 +372,47 @@ export function PWAProvider({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      {/* Offline Indicator */}
+      {/* Indicador Offline */}
       {!isOnline && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-accent text-accent-foreground py-2 px-4 text-center text-sm font-medium animate-in slide-in-from-top duration-300">
-          Você está offline. Algumas funcionalidades podem estar limitadas.
+          Voce esta offline. Algumas funcionalidades podem estar limitadas.
         </div>
       )}
     </PWAContext.Provider>
+  )
+}
+
+// Componente auxiliar para botao de notificacoes (pode ser usado em configuracoes)
+export function NotificationToggle() {
+  const { notificationPermission, requestNotificationPermission } = usePWA()
+
+  if (!('Notification' in window)) return null
+  if (notificationPermission === 'granted') {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <Bell className="h-4 w-4 text-primary" />
+        <span>Notificacoes ativadas</span>
+      </div>
+    )
+  }
+  if (notificationPermission === 'denied') {
+    return (
+      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <BellOff className="h-4 w-4" />
+        <span>Notificacoes bloqueadas no navegador</span>
+      </div>
+    )
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={requestNotificationPermission}
+      className="flex items-center gap-2"
+    >
+      <Bell className="h-4 w-4" />
+      Ativar notificacoes
+    </Button>
   )
 }
